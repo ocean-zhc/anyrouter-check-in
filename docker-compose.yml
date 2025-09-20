@@ -1,0 +1,50 @@
+services:
+  anyrouter-checkin:
+    build: .
+    container_name: anyrouter-checkin
+    environment:
+      # 必填：账号配置 (JSON格式)
+      - ANYROUTER_ACCOUNTS=${ANYROUTER_ACCOUNTS:-[]}
+      
+      # 可选：通知配置
+      - EMAIL_USER=${EMAIL_USER:-}
+      - EMAIL_PASS=${EMAIL_PASS:-}
+      - EMAIL_TO=${EMAIL_TO:-}
+      - DINGDING_WEBHOOK=${DINGDING_WEBHOOK:-}
+      - FEISHU_WEBHOOK=${FEISHU_WEBHOOK:-}
+      - WEIXIN_WEBHOOK=${WEIXIN_WEBHOOK:-}
+      - PUSHPLUS_TOKEN=${PUSHPLUS_TOKEN:-}
+      - SERVERPUSHKEY=${SERVERPUSHKEY:-}
+    volumes:
+      # 可选：挂载配置文件
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    # 设置定时任务 - 每6小时执行一次
+    command: ["schedule", "21600"]
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "./entrypoint.sh", "test"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # 可选：一次性运行服务
+  anyrouter-checkin-once:
+    build: .
+    container_name: anyrouter-checkin-once
+    environment:
+      - ANYROUTER_ACCOUNTS=${ANYROUTER_ACCOUNTS:-[]}
+      - EMAIL_USER=${EMAIL_USER:-}
+      - EMAIL_PASS=${EMAIL_PASS:-}
+      - EMAIL_TO=${EMAIL_TO:-}
+      - DINGDING_WEBHOOK=${DINGDING_WEBHOOK:-}
+      - FEISHU_WEBHOOK=${FEISHU_WEBHOOK:-}
+      - WEIXIN_WEBHOOK=${WEIXIN_WEBHOOK:-}
+      - PUSHPLUS_TOKEN=${PUSHPLUS_TOKEN:-}
+      - SERVERPUSHKEY=${SERVERPUSHKEY:-}
+    volumes:
+      - ./.env:/app/.env:ro
+    profiles:
+      - once
+    command: ["checkin"]

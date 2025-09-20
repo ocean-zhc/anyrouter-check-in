@@ -4,7 +4,9 @@
 
 **维护开源不易，如果本项目帮助到了你，请帮忙点个 Star，谢谢!**
 
-用于 Claude Code 中转站 Any Router 多账号每日签到，一次 $25，限时注册即送 100 美金，[点击这里注册](https://anyrouter.top/register?aff=gSsN)。业界良心，支持 Claude Code 百万上下文（使用 `/model sonnet[1m]` 开启），`gemini-2.5-pro` 模型。
+用于 Claude Code 中转站 Any Router 多账号每日签到，一次 $25，限时注册即送 100 美金，[点击这里注册](https://anyrouter.top/register?aff=px3A)。业界良心，支持 Claude Code 百万上下文（使用 `/model sonnet[1m]` 开启），`gemini-2.5-pro` 模型。
+
+另外还有一个公告中转站新户注册送200美金。[点击这里](https://agentrouter.org/register?aff=u6Z4)
 
 ## 功能特性
 
@@ -92,6 +94,121 @@
 3. 确认运行
 
 ![运行结果](./assets/check-in.png)
+
+## Docker 部署方式
+
+除了使用 GitHub Actions，你也可以使用 Docker 在本地或服务器上运行签到脚本。
+
+### 方式一：使用预构建镜像（推荐）
+
+直接使用我上传到 Docker Hub 的镜像：
+
+```bash
+# 一次性运行签到
+docker run --rm \
+  -e ANYROUTER_ACCOUNTS='[{"cookies":{"session":"your_session"},"api_user":"your_api_user"}]' \
+  wwwzhouhui569/anyrouter-checkin:latest
+
+# 定时运行（每6小时执行一次）
+docker run -d \
+  --name anyrouter-checkin \
+  -e ANYROUTER_ACCOUNTS='[{"cookies":{"session":"your_session"},"api_user":"your_api_user"}]' \
+  --restart unless-stopped \
+  wwwzhouhui569/anyrouter-checkin:latest schedule 21600
+```
+
+### 方式二：自己构建镜像
+
+```bash
+# 克隆项目
+git clone https://github.com/your-username/anyrouter-check-in.git
+cd anyrouter-check-in
+
+# 构建镜像
+docker build -t anyrouter-checkin .
+
+# 运行容器
+docker run --rm \
+  -e ANYROUTER_ACCOUNTS='[{"cookies":{"session":"your_session"},"api_user":"your_api_user"}]' \
+  anyrouter-checkin
+```
+
+### 方式三：使用 Docker Compose（推荐）
+
+1. 创建 `.env` 文件：
+
+```bash
+cp .env.example .env
+```
+
+2. 编辑 `.env` 文件，配置你的账号信息：
+
+```bash
+# 必填：账号配置
+ANYROUTER_ACCOUNTS=[{"cookies":{"session":"your_session"},"api_user":"your_api_user"}]
+
+# 可选：通知配置
+EMAIL_USER=your_email@example.com
+EMAIL_PASS=your_email_password
+EMAIL_TO=recipient@example.com
+DINGDING_WEBHOOK=https://oapi.dingtalk.com/robot/send?access_token=xxx
+```
+
+3. 启动服务：
+
+```bash
+# 定时运行（每6小时执行一次）
+docker-compose up -d
+
+# 一次性运行
+docker-compose --profile once up anyrouter-checkin-once
+```
+
+### Docker 命令说明
+
+容器支持以下运行模式：
+
+- `checkin`：执行一次签到（默认）
+- `schedule <间隔秒数>`：定时执行签到，默认21600秒（6小时）
+- `notify <标题> <内容> [类型]`：发送测试通知
+- `test`：健康检查测试
+- `shell`：进入容器交互式shell
+
+### 环境变量配置
+
+| 变量名 | 必填 | 说明 | 示例 |
+|--------|------|------|------|
+| `ANYROUTER_ACCOUNTS` | ✅ | 账号配置（JSON格式） | `[{"cookies":{"session":"xxx"},"api_user":"xxx"}]` |
+| `EMAIL_USER` | ❌ | 邮箱通知-发件人 | `your_email@example.com` |
+| `EMAIL_PASS` | ❌ | 邮箱通知-密码/授权码 | `your_password` |
+| `EMAIL_TO` | ❌ | 邮箱通知-收件人 | `recipient@example.com` |
+| `DINGDING_WEBHOOK` | ❌ | 钉钉机器人webhook | `https://oapi.dingtalk.com/robot/send?access_token=xxx` |
+| `FEISHU_WEBHOOK` | ❌ | 飞书机器人webhook | `https://open.feishu.cn/open-apis/bot/v2/hook/xxx` |
+| `WEIXIN_WEBHOOK` | ❌ | 企业微信机器人webhook | `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx` |
+| `PUSHPLUS_TOKEN` | ❌ | PushPlus推送token | `your_pushplus_token` |
+| `SERVERPUSHKEY` | ❌ | Server酱SendKey | `your_server_push_key` |
+
+### 查看运行日志
+
+```bash
+# 查看实时日志
+docker logs -f anyrouter-checkin
+
+# 查看最近100行日志
+docker logs --tail 100 anyrouter-checkin
+```
+
+### 停止和清理
+
+```bash
+# 停止容器
+docker-compose down
+
+# 停止并删除镜像
+docker-compose down --rmi all
+```
+
+详细的 Docker 部署说明请参考 [README-Docker.md](./README-Docker.md)。
 
 ## 执行时间
 

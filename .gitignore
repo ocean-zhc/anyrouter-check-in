@@ -4,3 +4,7 @@
 __pycache__
 .pytest_cache
 .ruff_cache
+.ipynb_checkpoints/docker-compose-checkpoint.yml
+.ipynb_checkpoints/Dockerfile-checkpoint
+.ipynb_checkpoints/entrypoint-checkpoint.sh
+.ipynb_checkpoints/README-checkpoint.md
